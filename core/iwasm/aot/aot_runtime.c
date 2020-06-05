@@ -1365,10 +1365,13 @@ invoke_native_with_hw_bound_check(WASMExecEnv *exec_env, void *func_ptr,
         return false;
     }
 
+// TODO: This assertion is failing in Faasm
+#ifndef WAMR_FAASM
     if (!os_thread_signal_inited()) {
         aot_set_exception(module_inst, "thread signal env not inited");
         return false;
     }
+#endif
 
     wasm_exec_env_push_jmpbuf(exec_env, &jmpbuf_node);
 
@@ -1592,6 +1595,7 @@ aot_set_exception_with_id(AOTModuleInstance *module_inst, uint32 id)
     if (id != EXCE_ALREADY_THROWN)
         wasm_set_exception_with_id(module_inst, id);
 #ifdef OS_ENABLE_HW_BOUND_CHECK
+    // TODO: this check is making us seg-fault during proc_exit!
     wasm_runtime_access_exce_check_guard_page();
 #endif
 }
